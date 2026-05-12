@@ -1,17 +1,21 @@
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 from groq import Groq
 import sqlite3
 import os
-from dotenv import load_dotenv
 from datetime import datetime
-
-load_dotenv()
+import textwrap
 
 app = Flask(__name__)
 
-# Configure Gemini
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.isdir(dotenv_path):
+    dotenv_path = os.path.join(dotenv_path, ".env")
+load_dotenv(dotenv_path)
 
+# Configure Gemini
+# Configure Groq
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Initialize database
 def init_db():
@@ -32,31 +36,31 @@ def init_db():
     conn.close()
 
 def analyze_incident(description):
-    prompt = f"""
-    You are a HIPAA and NIST 800-30 compliance expert for a healthcare startup called NurseLink, an Uber-for-nurses platform that handles Protected Health Information (PHI).
+    prompt = textwrap.dedent(f"""
+        You are a HIPAA and NIST 800-30 compliance expert for a healthcare startup called NurseLink, an Uber-for-nurses platform that handles Protected Health Information (PHI).
 
-    Analyze this security incident and respond in exactly this format with these exact headers:
+        Analyze this security incident and respond in exactly this format with these exact headers:
 
-    SEVERITY: [Critical/High/Medium/Low]
-    
-    HIPAA CONTROLS VIOLATED:
-    - List each specific HIPAA control violated with its section number (e.g. §164.312(a)(1) Access Control)
-    - Be specific and cite real HIPAA Security Rule sections
-    
-    NIST 800-30 RISK SCORE:
-    - Likelihood: [1-5] - [brief justification]
-    - Impact: [1-5] - [brief justification]
-    - Overall Risk: [Low/Moderate/High/Very High]
-    
-    REMEDIATION STEPS:
-    - List 4-5 specific actionable remediation steps
-    - Reference relevant HIPAA controls in each step
-    
-    POLICY RECOMMENDATION:
-    - One specific policy that NurseLink should implement to prevent recurrence
+        SEVERITY: [Critical/High/Medium/Low]
+        
+        HIPAA CONTROLS VIOLATED:
+        - List each specific HIPAA control violated with its section number (e.g. §164.312(a)(1) Access Control)
+        - Be specific and cite real HIPAA Security Rule sections
+        
+        NIST 800-30 RISK SCORE:
+        - Likelihood: [1-5] - [brief justification]
+        - Impact: [1-5] - [brief justification]
+        - Overall Risk: [Low/Moderate/High/Very High]
+        
+        REMEDIATION STEPS:
+        - List 4-5 specific actionable remediation steps
+        - Reference relevant HIPAA controls in each step
+        
+        POLICY RECOMMENDATION:
+        - One specific policy that NurseLink should implement to prevent recurrence
 
-    Incident Description: {description}
-    """
+        Incident Description: {description}
+    """)
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -64,7 +68,6 @@ def analyze_incident(description):
         max_tokens=1024
     )
     return response.choices[0].message.content
-
 
 def parse_response(response_text):
     result = {
@@ -165,11 +168,15 @@ def history():
             "id": row[0],
             "description": row[1],
             "severity": row[2],
+            "hipaa_controls": row[3],
+            "risk_score": row[4],
+            "remediation": row[5],
             "timestamp": row[6]
         })
-    
-    return jsonify(incidents)
+
+    return jsonify({"incidents": incidents})
 
 if __name__ == "__main__":
+    load_dotenv()
     init_db()
     app.run(debug=True)
