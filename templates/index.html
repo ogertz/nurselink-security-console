@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NurseLink Security Console</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0e1a;
+            color: #e0e6f0;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        header {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1a2035, #0d1525);
+            border-radius: 16px;
+            border: 1px solid #2a3a5c;
+            margin-bottom: 2rem;
+        }
+
+        header h1 { font-size: 2rem; color: #4a9eff; margin-bottom: 0.5rem; }
+        header p { color: #8899aa; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: #1a2035;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid #2a3a5c;
+        }
+
+        .card h2 { color: #4a9eff; margin-bottom: 1rem; font-size: 1.1rem; }
+
+        textarea {
+            width: 100%;
+            background: #0d1525;
+            border: 1px solid #2a3a5c;
+            border-radius: 10px;
+            color: #e0e6f0;
+            padding: 1rem;
+            font-size: 0.9rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+            font-family: inherit;
+            min-height: 140px;
+        }
+
+        textarea:focus { outline: none; border-color: #4a9eff; }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #4a9eff, #3a7fd4);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .examples p { color: #8899aa; font-size: 0.82rem; margin-bottom: 0.5rem; }
+
+        .example-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+        .chip {
+            background: #0d1525;
+            border: 1px solid #2a3a5c;
+            color: #8899aa;
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .chip:hover { border-color: #4a9eff; color: #4a9eff; }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+        }
+
+        .critical { background: #ff3a3a22; color: #ff3a3a; border: 1px solid #ff3a3a44; }
+        .high { background: #ff7a0022; color: #ff7a00; border: 1px solid #ff7a0044; }
+        .medium { background: #ffcc0022; color: #ffcc00; border: 1px solid #ffcc0044; }
+        .low { background: #00cc6622; color: #00cc66; border: 1px solid #00cc6644; }
+
+        .result-block {
+            margin-bottom: 1.2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid #2a3a5c;
+        }
+
+        .result-block:last-child { border-bottom: none; margin-bottom: 0; }
+
+        .result-block h3 {
+            color: #4a9eff;
+            font-size: 0.88rem;
+            margin-bottom: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-block p {
+            color: #b0bcc8;
+            font-size: 0.87rem;
+            line-height: 1.7;
+            padding-left: 0.75rem;
+            border-left: 2px solid #2a3a5c;
+            margin-bottom: 0.3rem;
+        }
+
+        .history-item {
+            display: grid;
+            grid-template-columns: 90px 1fr 150px;
+            gap: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            background: #0d1525;
+            border-left: 3px solid #2a3a5c;
+            align-items: center;
+        }
+
+        .history-item.critical { border-left-color: #ff3a3a; }
+        .history-item.high { border-left-color: #ff7a00; }
+        .history-item.medium { border-left-color: #ffcc00; }
+        .history-item.low { border-left-color: #00cc66; }
+
+        .history-sev { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #8899aa; }
+        .history-desc { font-size: 0.83rem; color: #8899aa; }
+        .history-time { font-size: 0.72rem; color: #4a5a6a; text-align: right; }
+
+        .btn-secondary {
+            background: #0d1525;
+            border: 1px solid #2a3a5c;
+            color: #8899aa;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.83rem;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover { border-color: #4a9eff; color: #4a9eff; }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: #0a0e1acc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #2a3a5c;
+            border-top-color: #4a9eff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .overlay p { color: #4a9eff; font-size: 0.95rem; }
+
+        .empty { color: #4a5a6a; font-size: 0.88rem; padding: 1rem 0; }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🏥 NurseLink Security Console</h1>
+        <p>AI-Powered HIPAA Incident Response Tool</p>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Report Security Incident</h2>
+            <textarea id="incidentInput" placeholder="Describe the security incident...&#10;&#10;Example: An unauthorized employee accessed patient scheduling data from a personal device while off-site."></textarea>
+            <button class="btn-primary" id="analyzeBtn" onclick="analyzeIncident()">⚡ Analyze Incident</button>
+            <div class="examples">
+                <p>Quick examples:</p>
+                <div class="example-chips">
+                    <span class="chip" onclick="loadExample(0)">Unauthorized Access</span>
+                    <span class="chip" onclick="loadExample(1)">Data Breach</span>
+                    <span class="chip" onclick="loadExample(2)">Ransomware</span>
+                    <span class="chip" onclick="loadExample(3)">Lost Device</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="resultsPanel" style="display:none">
+            <h2>Analysis Results</h2>
+            <div id="severityBadge" class="severity-badge"></div>
+
+            <div class="result-block">
+                <h3>⚠️ HIPAA Controls Violated</h3>
+                <div id="hipaaControls"></div>
+            </div>
+            <div class="result-block">
+                <h3>📊 NIST 800-30 Risk Score</h3>
+                <div id="riskScore"></div>
+            </div>
+            <div class="result-block">
+                <h3>🔧 Remediation Steps</h3>
+                <div id="remediation"></div>
+            </div>
+            <div class="result-block">
+                <h3>📋 Policy Recommendation</h3>
+                <div id="policy"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Recent Incidents</h2>
+        <div id="historyList"><p class="empty">No incidents recorded yet.</p></div>
+        <button class="btn-secondary" onclick="loadHistory()">↻ Refresh</button>
+    </div>
+</div>
+
+<div class="overlay" id="loading" style="display:none">
+    <div class="spinner"></div>
+    <p>Analyzing against HIPAA and NIST 800-30 frameworks...</p>
+</div>
+
+<script>
+    const examples = [
+        "An unauthorized employee accessed patient scheduling data from a personal device while off-site.",
+        "A nurse's laptop containing unencrypted PHI for 200 patients was stolen from their car.",
+        "Our AWS S3 bucket containing patient records was left publicly accessible for 3 days.",
+        "A staff member clicked a phishing email and entered their credentials on a fake login page."
+    ]
+
+    function loadExample(i) {
+        document.getElementById("incidentInput").value = examples[i]
+    }
+
+    async function analyzeIncident() {
+        const description = document.getElementById("incidentInput").value.trim()
+        if (!description) { alert("Please describe the incident first."); return; }
+
+        document.getElementById("loading").style.display = "flex"
+        document.getElementById("resultsPanel").style.display = "none"
+        document.getElementById("analyzeBtn").disabled = true
+
+        try {
+            const res = await fetch("/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ description })
+            })
+            const data = await res.json()
+            if (data.error) { alert("Error: " + data.error); return; }
+            displayResults(data)
+            loadHistory()
+        } catch (e) {
+            alert("Something went wrong. Check your terminal.")
+        } finally {
+            document.getElementById("loading").style.display = "none"
+            document.getElementById("analyzeBtn").disabled = false
+        }
+    }
+
+    function displayResults(data) {
+        const panel = document.getElementById("resultsPanel")
+        panel.style.display = "block"
+
+        const sev = (data.severity || "unknown").toLowerCase()
+        const badge = document.getElementById("severityBadge")
+        badge.textContent = "Severity: " + (data.severity || "Unknown")
+        badge.className = "severity-badge " + sev
+
+        document.getElementById("hipaaControls").innerHTML = fmt(data.hipaa_controls)
+        document.getElementById("riskScore").innerHTML = fmt(data.risk_score)
+        document.getElementById("remediation").innerHTML = fmt(data.remediation)
+        document.getElementById("policy").innerHTML = fmt(data.policy)
+
+        panel.scrollIntoView({ behavior: "smooth" })
+    }
+
+    function fmt(text) {
+        if (!text) return "<p>No data returned.</p>"
+        return text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('')
+    }
+
+    async function loadHistory() {
+        const res = await fetch("/history")
+        const incidents = await res.json()
+        const list = document.getElementById("historyList")
+        if (!incidents.length) { list.innerHTML = '<p class="empty">No incidents recorded yet.</p>'; return; }
+        list.innerHTML = incidents.map(i => `
+            <div class="history-item ${(i.severity||'').toLowerCase()}">
+                <span class="history-sev">${i.severity || 'Unknown'}</span>
+                <span class="history-desc">${i.description.substring(0, 80)}...</span>
+                <span class="history-time">${i.timestamp}</span>
+            </div>
+        `).join('')
+    }
+
+    loadHistory()
+</script>
+</body>
+</html>
