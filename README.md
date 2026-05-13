@@ -24,4 +24,8 @@ A Flask web application that analyzes security incidents for a fictional healthc
 3. Activate: `venv\Scripts\activate`
 4. Install dependencies: `pip install flask groq python-dotenv`
 5. Create `.env` file with `GROQ_API_KEY=yourkey`
+<<<<<<< HEAD
 6. Run: `python app.py`
+=======
+6. Run: `python app.py`
+>>>>>>> f7830fa2ad6179a2c0ab44a48c20645bfc389df8
